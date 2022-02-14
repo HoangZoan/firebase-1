@@ -1,9 +1,12 @@
 const FirebaseConfig = require("./FirebaseConfig");
+const recipesApi = require("./recipesApi");
 const functions = FirebaseConfig.functions;
 const auth = FirebaseConfig.auth;
 const firestore = FirebaseConfig.firestore;
 const storageBucket = FirebaseConfig.storageBucket;
 const admin = FirebaseConfig.admin;
+
+exports.api = functions.region("asia-southeast1").https.onRequest(recipesApi);
 
 // Choose the place where new data will be stored ("recipes/{recipeId}")
 exports.onCreateRecipe = functions
@@ -127,3 +130,42 @@ exports.onDeleteRecipe = functions
       }
     }
   });
+
+// https://crontab.guru/
+
+const runtimeOptions = {
+  timeoutSeconds: 300,
+  memory: "256MB",
+};
+
+exports.dailyCheckRecipePublishDate = functions
+  .region("asia-southeast1")
+  .runWith(runtimeOptions)
+  .pubsub.schedule("0 0 * * *")
+  .onRun(async () => {
+    console.log("dailyCheckRecipePublishDate() called - time to check");
+
+    const snapshot = await firestore
+      .collection("recipes")
+      .where("isPuplished", "==", false)
+      .get();
+
+    snapshot.forEach(async (doc) => {
+      const data = doc.data();
+      const now = Date.now() / 1000;
+      const isPublished = data.publishDate._seconds <= now ? true : false;
+
+      if (isPublished) {
+        console.log(`Recipe: ${data.name} is now published`);
+
+        firestore.collection("recipes").doc(doc.id).set(
+          {
+            isPublished,
+          },
+          { merge: true }
+        );
+      }
+    });
+  });
+
+console.log("SERVER STARTED");

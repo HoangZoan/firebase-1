@@ -16,10 +16,10 @@ function App() {
   const [recipesPerPage, setRecipesPerPage] = useState(3);
 
   const handleRecipesPerPageChange = (event) => {
-    const recipesPerPage = event.target.value;
+    const recipesPerPageOnSelect = event.target.value;
 
     setRecipes([]);
-    setRecipesPerPage(recipesPerPage);
+    setRecipesPerPage(recipesPerPageOnSelect);
   };
 
   const handleLoadMoreRecipesClick = () => {
