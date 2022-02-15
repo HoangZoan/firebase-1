@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import "./App.css";
 import FirebaseAuthService from "./FirebaseAuthService";
 import FirebaseFirestoreService from "./FirebaseFirestoreService";
-// import FirebaseFirestoreRestService from "./FirebaseFirestoreRestService";
+import FirebaseFirestoreRestService from "./FirebaseFirestoreRestService";
 import LoginForm from "./components/LoginForm";
 import AddEditRecipeForm from "./components/AddEditRecipeForm";
 import { Fragment } from "react/cjs/react.production.min";

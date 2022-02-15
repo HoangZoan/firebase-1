@@ -12,7 +12,7 @@ import {
   getDocs,
   updateDoc,
   deleteDoc,
-} from "firebase/firestore";
+} from "firebase/firestore/lite";
 
 const firestore = firebase.firestore;
 
