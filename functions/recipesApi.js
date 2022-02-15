@@ -139,6 +139,67 @@ app.get("/recipes", async (request, response) => {
   }
 });
 
+app.put("/recipes/:id", async (request, response) => {
+  const authorizationHeader = request.headers["authorization"];
+
+  if (!authorizationHeader) {
+    response.status(401).send("Missing Authorization Header");
+    return;
+  }
+
+  try {
+    await Utilities.authorizeUser(authorizationHeader, auth);
+  } catch (error) {
+    response.status(401).send(error.message);
+    return;
+  }
+
+  const id = request.params.id;
+  const newRecipe = request.body;
+  const missingFields = Utilities.validateRecipePostPut(newRecipe);
+
+  if (missingFields) {
+    response
+      .status(400)
+      .send(`Recipe is not valid. Missing/invalid fields: ${missingFields}`);
+    return;
+  }
+
+  const recipe = Utilities.sanitizeRecipePostPut(newRecipe);
+
+  try {
+    await firestore.collection("recipes").doc(id).set(recipe);
+
+    response.status(200).send({ id });
+  } catch (error) {
+    response.status(400).send(error.message);
+  }
+});
+
+app.delete("/recipes/:id", async (request, response) => {
+  const authorizationHeader = request.headers["authorization"];
+
+  if (!authorizationHeader) {
+    response.status(401).send("Missing Authorization Header");
+    return;
+  }
+
+  try {
+    await Utilities.authorizeUser(authorizationHeader, auth);
+  } catch (error) {
+    response.status(401).send(error.message);
+  }
+
+  const id = request.params.id;
+
+  try {
+    await firestore.collection("recipes").doc(id).delete();
+    response.status(200).send();
+  } catch (error) {
+    response.status(400).send(error.message);
+  }
+});
+
 if (process.env.NODE_ENV !== "production") {
   // Local dev
   app.listen(3005, () => {
