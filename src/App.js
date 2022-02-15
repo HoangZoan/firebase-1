@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import "./App.css";
 import FirebaseAuthService from "./FirebaseAuthService";
 import FirebaseFirestoreService from "./FirebaseFirestoreService";
+// import FirebaseFirestoreRestService from "./FirebaseFirestoreRestService";
 import LoginForm from "./components/LoginForm";
 import AddEditRecipeForm from "./components/AddEditRecipeForm";
 import { Fragment } from "react/cjs/react.production.min";
@@ -14,6 +15,9 @@ function App() {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [orderBy, setOrderBy] = useState("publishDateDesc");
   const [recipesPerPage, setRecipesPerPage] = useState(3);
+  // const [isLastPage, setIsLastPage] = useState(false);
+  // const [totalNumberOfPages, setTotalNumberOfPages] = useState(0);
+  // const [currentPageNumber, setCurrentPageNumber] = useState(1);
 
   const handleRecipesPerPageChange = (event) => {
     const recipesPerPageOnSelect = event.target.value;
@@ -75,20 +79,68 @@ function App() {
         perPage: recipesPerPage,
         cursorId,
       });
-
       const newRecipes = response.docs.map((recipeDoc) => {
         const id = recipeDoc.id;
         const data = recipeDoc.data();
         data.publishDate = new Date(data.publishDate.seconds * 1000);
-
         return { ...data, id };
       });
-
       if (cursorId) {
         fetchedRecipes = [...recipes, ...newRecipes];
       } else {
         fetchedRecipes = [...newRecipes];
       }
+
+      // const response = await FirebaseFirestoreRestService.readDocuments({
+      //   collection: "recipes",
+      //   queries,
+      //   orderByField,
+      //   orderByDirection,
+      //   perPage: recipesPerPage,
+      //   pageNumber: currentPageNumber,
+      // });
+
+      // if (response && response.documents) {
+      //   const totalNumberOfPages = Math.ceil(
+      //     response.recipeCount / recipesPerPage
+      //   );
+
+      //   setTotalNumberOfPages(totalNumberOfPages);
+
+      //   const nextPageQuery = {
+      //     collection: "recipes",
+      //     queries,
+      //     orderByField,
+      //     orderByDirection,
+      //     perPage: recipesPerPage,
+      //     pageNumber: currentPageNumber + 1,
+      //   };
+
+      //   const nextPageResponse = await FirebaseFirestoreService.readDocuments(
+      //     nextPageQuery
+      //   );
+
+      //   if (
+      //     nextPageResponse &&
+      //     nextPageResponse.documents &&
+      //     nextPageResponse.documents.length === 0
+      //   ) {
+      //     setIsLastPage(true);
+      //   } else {
+      //     setIsLastPage(false);
+      //   }
+
+      //   if (response.documents.length === 0 && currentPageNumber !== 1) {
+      //     setCurrentPageNumber(currentPageNumber - 1);
+      //   }
+
+      //   fetchedRecipes = response.documents;
+
+      //   fetchedRecipes.forEach((recipe) => {
+      //     const unixPublishDateTime = recipe.publishDate;
+      //     recipe.publishDate = new Date(unixPublishDateTime * 1000);
+      //   });
+      // }
     } catch (error) {
       console.error(error.message);
       throw error;
@@ -133,6 +185,10 @@ function App() {
         "recipes",
         newRecipe
       );
+      // const response = await FirebaseFirestoreRestService.createDocument(
+      //   "recipes",
+      //   newRecipe
+      // );
 
       // To-do: Fetch new recipes from firestore
       handleFetchRecipes();
@@ -151,6 +207,7 @@ function App() {
     if (deleteConfirmation) {
       try {
         await FirebaseFirestoreService.deleteDocument("recipes", recipeId);
+        // await FirebaseFirestoreRestService.deleteDocument("recipes", recipeId);
 
         handleFetchRecipes();
         setCurrentRepice(null);
@@ -171,6 +228,11 @@ function App() {
         recipeId,
         newRecipe
       );
+      // await FirebaseFirestoreRestService.updateDocument(
+      //   "recipes",
+      //   recipeId,
+      //   newRecipe
+      // );
 
       handleFetchRecipes();
 
@@ -339,6 +401,44 @@ function App() {
               >
                 LOAD MORE RECIPES
               </button>
+              {/* <div className="row">
+                <button
+                  className={`primary-button${
+                    currentPageNumber === 1 ? " hidden" : ""
+                  }`}
+                  type="button"
+                  onClick={() => setCurrentPageNumber(currentPageNumber - 1)}
+                >
+                  Previous
+                </button>
+                <div>Page {currentPageNumber}</div>
+                <button
+                  className={`primary-button${isLastPage ? " hidden" : ""}`}
+                  type="button"
+                  onClick={() => setCurrentPageNumber(currentPageNumber + 1)}
+                >
+                  Next
+                </button>
+              </div>
+              <div className="row">
+                {!categoryFilter &&
+                  new Array(totalNumberOfPages).fill(0).map((value, index) => {
+                    return (
+                      <button
+                        key={index + 1}
+                        type="button"
+                        className={
+                          currentPageNumber === index + 1
+                            ? "selected-page primary-button page-button"
+                            : "primary-button page-button"
+                        }
+                        onClick={() => setCurrentPageNumber(index + 1)}
+                      >
+                        {index + 1}
+                      </button>
+                    );
+                  })}
+              </div> */}
             </div>
           </Fragment>
         )}

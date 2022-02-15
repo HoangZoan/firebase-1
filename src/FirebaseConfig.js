@@ -1,7 +1,10 @@
-import firebase from "firebase/app";
-import "firebase/auth";
-import "firebase/firestore";
-import "firebase/storage";
+import firebase from "firebase/compat/app";
+import "firebase/compat/auth";
+import "firebase/compat/firestore";
+import "firebase/compat/storage";
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 const config = {
   apiKey: process.env.REACT_APP_API_KEY,
@@ -12,8 +15,21 @@ const config = {
   appId: process.env.REACT_APP_APP_ID,
 };
 
-if (!firebase.apps.length) {
-  firebase.initializeApp(config);
-}
+// Version 8
+const classicFirebaseApp = firebase.initializeApp(config);
+// const auth = classicFirebaseApp.auth();
+// const firestore = classicFirebaseApp.firestore();
+const storage = classicFirebaseApp.storage();
 
-export default firebase;
+// Version 9
+const firebaseApp = initializeApp(config);
+const auth = getAuth(firebaseApp);
+const firestore = getFirestore(firebaseApp);
+
+const firebaseConfig = {
+  auth,
+  firestore,
+  storage,
+};
+
+export default firebaseConfig;

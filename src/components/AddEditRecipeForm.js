@@ -47,6 +47,7 @@ const AddEditRecipeForm = ({
       name,
       category,
       directions,
+      // publishDate: new Date(publishDate).getTime() / 1000,
       publishDate: new Date(publishDate),
       isPublished,
       ingredients,
